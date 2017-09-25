@@ -5,15 +5,18 @@ namespace CastleGrimtol.Project
 {
     public class Game : IGame
     {
+
         public Room CurrentRoom { get; set; }
         public Player CurrentPlayer { get; set; }
         public void Setup()
         {
+            CurrentPlayer = new Player();
             //build rooms
             Room room1 = new Room("room1", "you begin the quest here in this squalor of a room, with no way back,/n the only thing to do now is move forward,/n however this room does have some old sword here, /n maybe it will be of some use?");
             Room room2 = new Room("room2", "the room is dark and you seem to have located the door./n but it has been long boarded up./n maye there is something here that can help you? ");
             Room room3 = new Room("room3", "the room is covered in weird vines that seem almost alive, you prod them hoping for a good reaction but nothing happens, perhaps they are needing to be pruned?");
             Room room4 = new Room("room4", "this is the final room to escape, hopefully things will be easy enough from now on... oh no the dragon!!");
+            Room room5 = new Room("room5", "omg yo made it! you win!!");
             //Room room5 = new Room("room5", "final room");
             //establish relationships
             room1.Exits.Add("e", room2);
@@ -22,8 +25,8 @@ namespace CastleGrimtol.Project
             room3.Exits.Add("w", room2);
             room3.Exits.Add("e", room4);
             room4.Exits.Add("w", room3);
-            //room4.Exits.Add("e", room5);
-            //room5.Exits.Add("w", room4);
+            room4.Exits.Add("e", room5);
+            room5.Exits.Add("w", room4);
             //build items and build to room
             Item sword = new Item("sword", "a big sharp object used for slaying");
             // Item shield = new Item("shield", "something like a mirror but more defensible");
@@ -38,6 +41,7 @@ namespace CastleGrimtol.Project
             System.Console.WriteLine("W == move west to new room");
             System.Console.WriteLine("E == move east to new room");
             System.Console.WriteLine("R == resets game to beginning");
+            System.Console.WriteLine("Q == End the game");
             System.Console.WriteLine("your in a room that has only one exit should we get on with it already?");
             GetInput();
         }
@@ -63,13 +67,17 @@ namespace CastleGrimtol.Project
             }
             else if (userinput == "t")
             {
-                Item item = CurrentRoom.Items.Find(Item => Item.Name== "sword");
+                Item item = CurrentRoom.Items.Find(Item => Item.Name == "sword");
                 Console.WriteLine(item.Name);
                 Take(item);
             }
+            else if (userinput == "q")
+            {
+                Quit();
+            }
             else
             {
-                System.Console.WriteLine("what the fuck!!!");
+                System.Console.WriteLine("where you picking your finger when you started typing?");
             }
         }
 
@@ -82,13 +90,32 @@ namespace CastleGrimtol.Project
         public void Go(string direction)
         {
             //write out validation
-            if (CurrentRoom.Exits.ContainsKey("e") || CurrentRoom.Exits.ContainsKey("w"))
+            if (CurrentRoom.Exits.ContainsKey(direction))
             {
+                if (CurrentRoom.Name == "room4" && direction == "e")
+                {
+                    if (CurrentPlayer.Inventory.Count == 1)
+                    {
+                        CurrentRoom = CurrentRoom.Exits[direction];
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("sorry no whacking for you tonight.");
+                    }
+                }
+                else
+                {
+                    CurrentRoom = CurrentRoom.Exits[direction];
 
-                CurrentRoom = CurrentRoom.Exits[direction];
-                System.Console.WriteLine($"you are in {CurrentRoom.Name}, {CurrentRoom.Description}");
-                CurrentPlayer.Score++;
+                }
+
             }
+
+            else
+            {
+                System.Console.WriteLine("sorry doesnt exist");
+            }
+            System.Console.WriteLine($"you are in {CurrentRoom.Name}, {CurrentRoom.Description}");
         }
         public void Reset()
         {
@@ -103,6 +130,7 @@ namespace CastleGrimtol.Project
             {
                 if (userinput == "y")
                 {
+                    System.Console.Clear();
                     Setup();
                 }
             }
@@ -119,20 +147,21 @@ namespace CastleGrimtol.Project
             {
                 if (CurrentRoom.Items[i].Name == item.Name)
                 {
-                    Console.ReadLine();
+
                     CurrentPlayer.Inventory.Add(item);
                     CurrentRoom.Items.Remove(item);
                     System.Console.WriteLine("moved to inventory");
+
                 }
             }
         }
         public void UseItem(Item item)
         {
-            for(var i = 0; i<CurrentPlayer.Inventory.Count; i++)
+            for (var i = 0; i < CurrentPlayer.Inventory.Count; i++)
             {
-                if(CurrentPlayer.Inventory[i].Name == item.Name)
+                if (CurrentPlayer.Inventory[i].Name == item.Name)
                 {
-                    
+
                 }
             }
         }
@@ -140,6 +169,12 @@ namespace CastleGrimtol.Project
         public void UseItem(string itemName)
         {
             throw new NotImplementedException();
+        }
+        public void Quit()
+        {
+            System.Console.WriteLine("Quitters!");
+            Program.Running = false;
+
         }
     }
 }

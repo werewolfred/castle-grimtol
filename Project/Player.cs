@@ -9,9 +9,9 @@ namespace CastleGrimtol.Project
         public int Score { get; set; }
         public List<Item> Inventory { get; set; }
 
-        public Player(int score, List<Item> inventory)
+        public Player()
         {
-            Score = score;
+            Score = 0;
             Inventory = new List<Item>();
             
         }
